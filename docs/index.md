@@ -2,15 +2,15 @@
 layout: home
 
 hero:
-  name: "Yifang Docs"
+  name: "Yifang Docs AA"
   text: "Learning • AI • Product"
   tagline: "记录学习、产品思考和 AI 探索"
   actions:
     - theme: brand
-      text: 开始阅读
+      text: 开始阅读 1
       link: /notes/
     - theme: alt
-      text: 关于我
+      text: 关于我 2
       link: /about/
 
 features:
