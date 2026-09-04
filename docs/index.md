@@ -2,7 +2,7 @@
 layout: home
 
 hero:
-  name: "Yifang Docs AA"
+  name: "Yifang Docs"
   text: "Learning • AI • Product"
   tagline: "记录学习、产品思考和 AI 探索"
   actions:
