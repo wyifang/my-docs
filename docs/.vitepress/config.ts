@@ -4,6 +4,9 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
     title: 'Yifang Docs from defineConfig',
     description: 'My first VitePress documentation site',
+
+    base: '/my-docs/',
+    
     themeConfig: {
         nav: [
           { text: '首页nav', link: '/' },
