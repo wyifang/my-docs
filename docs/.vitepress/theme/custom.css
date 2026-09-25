@@ -1,0 +1,100 @@
+:root {
+  --vp-c-brand-1: #3b82f6;
+  --vp-c-brand-2: #2563eb;
+  --vp-c-brand-3: #1d4ed8;
+}
+
+
+
+
+
+/* 首页：柔和蓝紫渐变科技风 */
+.VPHome .VPHero {
+  position: relative;
+  margin: 0;
+  padding: 72px 24px 64px;
+  border: none;
+  border-radius: 0;
+  background:
+    radial-gradient(
+      ellipse at 15% 25%,
+      rgba(96, 165, 250, 0.22),
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse at 85% 15%,
+      rgba(167, 139, 250, 0.20),
+      transparent 42%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(239, 246, 255, 0.95),
+      rgba(245, 243, 255, 0.9),
+      rgba(239, 246, 255, 0.7)
+    );
+}
+
+/* 标题更清晰，保持深色文字 */
+.VPHome .VPHero .name,
+.VPHome .VPHero .text {
+  color: #172554;
+}
+
+/* 副标题 */
+.VPHome .VPHero .tagline {
+  color: #475569;
+}
+
+/* 主按钮：蓝色渐变 */
+.VPHome .VPHero .actions .VPButton.brand {
+  color: white;
+  border-color: transparent;
+  background: linear-gradient(120deg, #2563eb, #7c3aed);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.2);
+}
+
+/* 次按钮：轻盈的浅色样式 */
+.VPHome .VPHero .actions .VPButton.alt {
+  color: #334155;
+  border-color: rgba(100, 116, 139, 0.25);
+  background: rgba(255, 255, 255, 0.75);
+}
+
+/* 首页卡片：轻盈、无白色块感 */
+.VPHome .VPFeature {
+  border: 1px solid transparent;
+  border-radius: 16px;
+  background: transparent;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* 悬停时才出现轻微的蓝色强调 */
+.VPHome .VPFeature:hover {
+  transform: translateY(-4px);
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.04);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.08);
+}
+
+/* 移动端留白 */
+@media (max-width: 640px) {
+  .VPHome .VPHero {
+    padding: 48px 20px;
+  }
+}
+
+
+/* 首页卡片图标：更醒目 */
+.VPHome .VPFeature .icon {
+  font-size: 28px;
+  margin-bottom: 12px;
+  transition: transform 0.2s ease;
+}
+
+/* 悬停时图标轻微放大 */
+.VPHome .VPFeature:hover .icon {
+  transform: scale(1.12);
+}

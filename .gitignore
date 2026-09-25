@@ -1,13 +1,13 @@
-# Dependencies
+# Dependencies 忽略 Node.js 依赖包目录
 node_modules/
 
-# VitePress cache
+# VitePress cache 忽略 VitePress 的构建缓存
 docs/.vitepress/cache
 
-# Build output
+# Build output 忽略 VitePress 打包后的静态网站文件
 docs/.vitepress/dist
 
-# Logs
+# Logs 日志文件
 logs
 *.log
 npm-debug.log*
@@ -16,18 +16,22 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# 本地配置文件,其他构建输出目录, 重复的依赖和构建目录
 node_modules
 dist
 dist-ssr
 *.local
 
-# Editor directories and files
+# Editor directories and files 忽略 VS Code、WebStorm、Visual Studio 等编辑器的项目配置文件
 .vscode/*
+# 特例，表示允许提交这个文件（因为推荐插件列表对团队有用）
 !.vscode/extensions.json
 .idea
+# 忽略 macOS 系统文件 .DS_Store
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
+# 忽略 Vim/Emacs 的临时交换文件（*.sw?）
 *.sw?
