@@ -1,5 +1,7 @@
 ---
 title: 标题与段落
+description: 学习 Markdown 标题、段落和基本排版
+outline: [2]
 ---
 # 标题与段落
 

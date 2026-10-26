@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "Yifang Docs"
   text: "Learning • AI • Product"
-  tagline: "记录学习、产品思考和 AI 探索"
+  tagline: "从技术学习到实际开发，记录每一步实践、每一个项目和每一次产品探索。"
   actions:
     - theme: brand
       text: 开始阅读
@@ -25,9 +25,9 @@ features:
     linkText: 浏览AI内容
 
   - title: 💻 项目
-    details: 产品设计、项目开发、踩坑记录与经验分享。
-    link: /about/
-    linkText: 了解更多
+    details: 产品设计、项目开发、Python 与 AI 应用实践，以及踩坑记录与经验分享。
+    link: /products/
+    linkText: 了解项目
 
   - title: 👋 关于
     details: 了解本站的目的与作者。

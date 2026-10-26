@@ -8,11 +8,15 @@ export default defineConfig({
     base: '/my-docs/',
     
     themeConfig: {
+        outline: {
+          level: [2, 3],
+          label: '本页目录'
+        },
         nav: [
           { text: '首页', link: '/' },
           { text: '学习笔记', link: '/notes/' },
           { text: 'AI', link: '/ai/' },
-          { text: 'AI 数据湖', link: '/ai-data-lake/' },
+          { text: '项目', link: '/products/' },
           { text: '关于', link: '/about/' }
         ],
         sidebar: {
@@ -51,41 +55,48 @@ export default defineConfig({
                 { text: '任务列表', link: '/notes/markdown/task-lists' },
                 { text: '转义字符', link: '/notes/markdown/escape' },
                 { text: 'Emoji', link: '/notes/markdown/emoji' },
-                { text: '数学公式', link: '/notes/markdown/math' },
-                { text: '自定义容器', link: '/notes/markdown/custom-containers' },
               ]
             }
-          ]
-        },
-        /*
-        sidebar: {
-          '/notes/': [
+          ],
+          '/ai/': [
             {
-              text: '学习笔记',
+              text: 'AI 学习中心',
               items: [
-                { text: '笔记首页', link: '/notes/' },
-                { text: 'Git 学习笔记', link: '/notes/git/' },
-                { text: 'Git 基础', link: '/notes/git/basic' },
-                { text: 'Git 分支', link: '/notes/git/branch' },
-                { text: 'Git 合并与冲突', link: '/notes/git/merge' },
-                { text: 'Git 远程仓库和同步', link: '/notes/git/remote' },
-                { text: 'Markdown 学习笔记', link: '/notes/markdown/' }
+                { text: 'AI 总览', link: '/ai/' },
+                { text: '知识地图', link: '/ai/knowledge-map' }
+              ]
+            },
+            {
+              text: 'Prompt Engineering',
+              items: [
+                { text: '提示词工程入门', link: '/ai/prompt/' }
+              ]
+            },
+            {
+              text: 'RAG',
+              items: [
+                { text: 'RAG 入门', link: '/ai/rag/' }
+              ]
+            },
+            {
+              text: 'MCP',
+              items: [
+                { text: 'MCP 入门', link: '/ai/mcp/' }
+              ]
+            },
+            {
+              text: 'Agent',
+              items: [
+                { text: 'Agent 入门', link: '/ai/agent/' }
+              ]
+            },         
+            {
+              text: 'AI 数据基础设施',
+              items: [
+                { text: '数据基础设施入门', link: '/ai/data-infrastructure/' }
               ]
             }
           ]
         },
-        */    
-        outline: {
-          level: [2, 3],
-          label: '本页目录'
-        }
-        /*
-        sidebar: [
-          { text: '首页sidebar', link: '/' },
-          { text: '学习笔记sidebar', link: '/notes/' },
-          { text: 'AIsidebar', link: '/ai/' },
-          { text: '关于sidebar', link: '/about/' }
-        ]
-        */
       }
 })
