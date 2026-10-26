@@ -17,7 +17,9 @@ export default defineConfig({
           { text: '学习笔记', link: '/notes/' },
           { text: 'AI', link: '/ai/' },
           { text: '项目', link: '/products/' },
-          { text: '关于', link: '/about/' }
+          { text: '关于', link: '/about/' },
+          { text: 'API 开发项目', link: '/maas-api-lab'},
+          { text: 'API Reference', link: '/api-reference.html'}
         ],
         sidebar: {
           '/notes/': [
