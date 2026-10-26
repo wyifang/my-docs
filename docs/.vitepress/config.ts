@@ -12,14 +12,14 @@ export default defineConfig({
           level: [2, 3],
           label: '本页目录'
         },
-        nav: [
+        nav:[
           { text: '首页', link: '/' },
           { text: '学习笔记', link: '/notes/' },
           { text: 'AI', link: '/ai/' },
           { text: '项目', link: '/products/' },
           { text: '关于', link: '/about/' },
           { text: 'API 开发项目', link: '/maas-api-lab'},
-          { text: 'API Reference', link: '/api-reference.html'}
+          { text: 'API Reference', link: 'https://wyifang.github.io/my-docs/api-reference.html'}
         ],
         sidebar: {
           '/notes/': [
