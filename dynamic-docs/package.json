@@ -1,0 +1,48 @@
+{
+  "name": "dynamic-docs",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "postinstall": "npm run db:generate",
+    "lint": "eslint",
+    "test": "tsx --test src/lib/schemas.test.ts src/lib/access.test.ts src/lib/revision-diff.test.ts src/lib/storage.test.ts src/app/api/health/route.test.ts",
+    "db:generate": "prisma generate --schema prisma/postgresql/schema.prisma && prisma generate --schema prisma/schema.sqlite.prisma",
+    "db:migrate": "prisma migrate dev --schema prisma/schema.sqlite.prisma",
+    "db:migrate:postgres": "prisma migrate dev --schema prisma/postgresql/schema.prisma",
+    "db:deploy:postgres": "prisma migrate deploy --schema prisma/postgresql/schema.prisma",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio --schema prisma/schema.sqlite.prisma",
+    "db:import:sqlite": "tsx scripts/import-sqlite-data.ts",
+    "agent-token:create": "tsx scripts/create-agent-token.ts",
+    "agent-token:revoke": "tsx scripts/revoke-agent-token.ts",
+    "mcp:stdio": "tsx scripts/mcp-stdio.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.4.0",
+    "@prisma/client": "6.19.3",
+    "@vercel/blob": "2.4.0",
+    "next": "16.4.3",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.3",
+    "prisma": "6.19.3",
+    "tsx": "^4.23.15",
+    "typescript": "^5"
+  },
+  "overrides": {
+    "@prisma/config": {
+      "deepmerge-ts": "8.0.0"
+    },
+    "minimatch": "11.0.1"
+  }
+}

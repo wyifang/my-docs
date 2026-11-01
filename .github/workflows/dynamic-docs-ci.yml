@@ -1,0 +1,76 @@
+name: Dynamic Docs CI
+
+on:
+  push:
+    paths:
+      - "dynamic-docs/**"
+      - ".github/workflows/dynamic-docs-ci.yml"
+  pull_request:
+    paths:
+      - "dynamic-docs/**"
+      - ".github/workflows/dynamic-docs-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: dynamic-docs
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_PROVIDER: postgresql
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/docforge?schema=public
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/docforge?schema=public
+      STORAGE_PROVIDER: local
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: docforge
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d docforge"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: dynamic-docs/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check dependency advisories
+        run: npm audit
+
+      - name: Generate Prisma Client
+        run: npm run db:generate
+
+      - name: Apply database migrations
+        run: npm run db:deploy:postgres
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build

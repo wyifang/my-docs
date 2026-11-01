@@ -1,0 +1,237 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/@docforge/prisma-postgres"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                  String           @id @default(cuid())
+  email               String           @unique
+  name                String
+  passwordHash        String
+  role                String
+  active              Boolean          @default(true)
+  organizationId      String?
+  organization        Organization?    @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  createdAt           DateTime         @default(now())
+  sessions            Session[]
+  chunks              Chunk[]          @relation("ChunkAuthor")
+  revisions           ChunkRevision[]  @relation("RevisionAuthor")
+  assignedReviews     ChunkRevision[]  @relation("AssignedReviewer")
+  publications        PublishedChunk[] @relation("Publisher")
+  pages               DocPage[]        @relation("PageAuthor")
+  pageRevisions       PageRevision[]   @relation("PageRevisionAuthor")
+  assignedPageReviews PageRevision[]   @relation("AssignedPageReviewer")
+  pagePublications    PublishedPage[]  @relation("PagePublisher")
+  agentTokens     AgentToken[]
+  attachments     Attachment[]
+  auditEvents     AuditEvent[]
+}
+
+model AgentToken {
+  id         String    @id @default(cuid())
+  name       String
+  tokenHash  String    @unique
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scopes     String    @default("search,read")
+  createdAt  DateTime  @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  lastUsedAt DateTime?
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Organization {
+  id        String   @id
+  name      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  users     User[]
+}
+
+model Chunk {
+  id              String              @id
+  createdBy       String
+  author          User                @relation("ChunkAuthor", fields: [createdBy], references: [id])
+  createdAt       DateTime            @default(now())
+  revisions       ChunkRevision[]
+  published       PublishedChunk?
+  attachments     Attachment[]
+  pageReferences  PageRevisionChunk[]
+  languageGroupId String?
+  languageGroup   ChunkLanguageGroup? @relation(fields: [languageGroupId], references: [id], onDelete: SetNull)
+
+  @@index([createdBy])
+  @@index([languageGroupId])
+}
+
+model ChunkLanguageGroup {
+  id        String   @id @default(cuid())
+  stableKey String   @unique
+  createdAt DateTime @default(now())
+  chunks    Chunk[]
+}
+
+model ChunkRevision {
+  id                     String          @id @default(cuid())
+  chunkId                String
+  chunk                  Chunk           @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  revision               Int
+  title                  String
+  contentType            String
+  language               String
+  product                String
+  apiVersion             String
+  accessPolicy           String
+  allowedOrganizationIds String          @default("[]")
+  tags                   String          @default("[]")
+  allowedAgentScope      String
+  lastVerified           DateTime?
+  deprecationStatus      String
+  bodyJson               String
+  reviewStatus           String          @default("DRAFT")
+  createdBy              String
+  author                 User            @relation("RevisionAuthor", fields: [createdBy], references: [id])
+  reviewerId             String?
+  reviewer               User?           @relation("AssignedReviewer", fields: [reviewerId], references: [id])
+  reviewComment          String?
+  createdAt              DateTime        @default(now())
+  restoredFromRevisionId String?
+  restoredFromRevision   ChunkRevision?  @relation("RevisionRestore", fields: [restoredFromRevisionId], references: [id], onDelete: SetNull)
+  restoredAsRevisions    ChunkRevision[] @relation("RevisionRestore")
+  published              PublishedChunk?
+
+  @@unique([chunkId, revision])
+  @@index([createdBy, reviewStatus])
+  @@index([reviewerId, reviewStatus])
+  @@index([language, product, apiVersion])
+  @@index([restoredFromRevisionId])
+}
+
+model DocPage {
+  id              String             @id @default(cuid())
+  slug            String             @unique
+  createdBy       String
+  author          User               @relation("PageAuthor", fields: [createdBy], references: [id])
+  createdAt       DateTime           @default(now())
+  revisions       PageRevision[]
+  published       PublishedPage?
+  languageGroupId String?
+  languageGroup   PageLanguageGroup? @relation(fields: [languageGroupId], references: [id], onDelete: SetNull)
+
+  @@index([languageGroupId])
+}
+
+model PageLanguageGroup {
+  id        String    @id @default(cuid())
+  stableKey String    @unique
+  createdAt DateTime  @default(now())
+  pages     DocPage[]
+}
+
+model PageRevision {
+  id            String              @id @default(cuid())
+  pageId        String
+  page          DocPage             @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  revision      Int
+  title         String
+  summary       String              @default("")
+  language      String
+  product       String
+  apiVersion    String
+  reviewStatus  String              @default("DRAFT")
+  createdBy     String
+  author        User                @relation("PageRevisionAuthor", fields: [createdBy], references: [id])
+  reviewerId    String?
+  reviewer      User?               @relation("AssignedPageReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  reviewComment String?
+  createdAt     DateTime            @default(now())
+  items         PageRevisionChunk[]
+  published     PublishedPage?
+
+  @@unique([pageId, revision])
+  @@index([reviewerId, reviewStatus])
+  @@index([createdBy, reviewStatus])
+}
+
+model PageRevisionChunk {
+  id             String       @id @default(cuid())
+  pageRevisionId String
+  pageRevision   PageRevision @relation(fields: [pageRevisionId], references: [id], onDelete: Cascade)
+  chunkId        String
+  chunk          Chunk        @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  position       Int
+
+  @@unique([pageRevisionId, position])
+  @@unique([pageRevisionId, chunkId])
+  @@index([chunkId])
+}
+
+model PublishedPage {
+  pageId      String       @id
+  page        DocPage      @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  revisionId  String       @unique
+  revision    PageRevision @relation(fields: [revisionId], references: [id])
+  publishedBy String
+  publisher   User         @relation("PagePublisher", fields: [publishedBy], references: [id])
+  publishedAt DateTime     @default(now())
+}
+
+model PublishedChunk {
+  chunkId     String        @id
+  chunk       Chunk         @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  revisionId  String        @unique
+  revision    ChunkRevision @relation(fields: [revisionId], references: [id])
+  publishedBy String
+  publisher   User          @relation("Publisher", fields: [publishedBy], references: [id])
+  publishedAt DateTime      @default(now())
+}
+
+model Attachment {
+  id           String   @id @default(cuid())
+  chunkId      String
+  chunk        Chunk    @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  uploadedById String
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+  storageKey   String   @unique
+  originalName String
+  mimeType     String
+  size         Int
+  createdAt    DateTime @default(now())
+
+  @@index([chunkId, createdAt])
+}
+
+model AuditEvent {
+  id          String   @id @default(cuid())
+  actorId     String?
+  actor       User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action      String
+  targetType  String
+  targetId    String
+  detailsJson String   @default("{}")
+  createdAt   DateTime @default(now())
+
+  @@index([targetType, targetId, createdAt])
+  @@index([actorId, createdAt])
+}
