@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { canAccessPublishedRevision } from "@/lib/content";
+import { getAttachmentAccess } from "@/lib/attachment-access";
 import { readAttachment } from "@/lib/storage";
 
 type RouteContext = { params: Promise<{ attachmentId: string }> };
@@ -38,33 +38,15 @@ export async function GET(request: Request, context: RouteContext) {
     apiVersion: url.searchParams.get("apiVersion") ?? undefined,
     language: url.searchParams.get("language") ?? undefined,
   };
-  const publishedBody: unknown = attachment.chunk.published
-    ? JSON.parse(attachment.chunk.published.revision.bodyJson)
-    : null;
-  const isReferenced = (value: unknown): boolean => {
-    if (value === attachment.id) return true;
-    if (Array.isArray(value)) return value.some(isReferenced);
-    if (typeof value === "object" && value !== null) return Object.values(value).some(isReferenced);
-    return false;
-  };
-  const publishedAccess =
-    attachment.chunk.published !== null &&
-    isReferenced(publishedBody) &&
-    canAccessPublishedRevision(attachment.chunk.published.revision, user, filters);
-  const privateAccess =
-    user !== null &&
-    (user.role === "ADMIN" ||
-      attachment.uploadedById === user.id ||
-      attachment.chunk.revisions.some(
-        (revision) => revision.reviewerId === user.id && revision.reviewStatus === "IN_REVIEW",
-    ) ||
-    (user.role === "PUBLISHER" &&
-      attachment.chunk.revisions.some(
-        (revision) =>
-          revision.reviewStatus === "APPROVED" &&
-          canAccessPublishedRevision(revision, user, filters),
-      )));
-  if (!publishedAccess && !privateAccess) {
+  const access = getAttachmentAccess({
+    attachmentId: attachment.id,
+    uploadedById: attachment.uploadedById,
+    publishedRevision: attachment.chunk.published?.revision ?? null,
+    revisions: attachment.chunk.revisions,
+    user,
+    filters,
+  });
+  if (!access.allowed) {
     return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
   }
 
@@ -76,7 +58,7 @@ export async function GET(request: Request, context: RouteContext) {
       "content-length": String(attachment.size),
       "content-disposition": `${attachment.mimeType === "application/pdf" ? "attachment" : "inline"}; filename*=UTF-8''${encodeURIComponent(attachment.originalName)}`,
       "x-content-type-options": "nosniff",
-      "cache-control": publishedAccess && attachment.chunk.published?.revision.accessPolicy === "PUBLIC"
+      "cache-control": access.isPublic
         ? "public, max-age=60"
         : "private, no-store",
     },
