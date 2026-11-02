@@ -106,6 +106,8 @@ SQLite Schema 保存在 `prisma/schema.sqlite.prisma`，其既有迁移历史仍
 
 ## 质量检查与运行健康状态
 
+CMS 的 Chunk 详情页提供非阻断式文档质量检查，覆盖结构有效性、人类可读性、Agent 可检索性、版本准确性/新鲜度、约束清晰度、弃用处理和访问控制。当前新鲜度通过标准为 `lastVerified` 在过去 365 天内；该检查给出发布前建议，不替代 Reviewer 决策，也不改变服务端授权规则。相关规则由 `src/lib/document-quality.test.ts` 验证。
+
 访问 `/api/health` 可检查应用和数据库是否可用。成功时返回 `200 {"status":"ok"}`；数据库不可用时返回 `503 {"status":"unhealthy"}`。健康检查响应不缓存，也不会暴露数据库连接信息。
 
 GitHub Actions 会在 `dynamic-docs/` 或对应工作流变更时运行依赖审计、PostgreSQL 迁移、lint、单元测试、TypeScript 检查和生产构建。CI 使用临时 PostgreSQL 服务，不依赖本机数据库或生产凭据。

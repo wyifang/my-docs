@@ -9,6 +9,7 @@ import { TranslationLink } from "@/components/translation-link";
 import { getCurrentUser } from "@/lib/auth";
 import { getCmsChunk } from "@/lib/content";
 import { db } from "@/lib/db";
+import { evaluateDocumentQuality } from "@/lib/document-quality";
 import { canRestoreRevision, compareRevisionValues } from "@/lib/revision-diff";
 
 export const dynamic = "force-dynamic";
@@ -80,6 +81,20 @@ export default async function CmsChunkPage({ params, searchParams }: RouteProps)
       : [];
 
   const latest = chunk.revisions[0];
+  const qualityChecks = evaluateDocumentQuality({
+    title: latest.title,
+    contentType: latest.contentType,
+    language: latest.language,
+    product: latest.product,
+    apiVersion: latest.apiVersion,
+    accessPolicy: latest.accessPolicy,
+    allowedOrganizationIds: latest.allowedOrganizationIds,
+    tags: latest.tags,
+    allowedAgentScope: latest.allowedAgentScope,
+    lastVerified: latest.lastVerified,
+    deprecationStatus: latest.deprecationStatus,
+    body: latest.body,
+  });
   const isAuthor = user.role === "ADMIN" || (user.role === "AUTHOR" && latest.reviewStatus !== "IN_REVIEW");
   const published = chunk.publishedRevision === latest.revision;
   const compareId = Array.isArray(query.compare) ? query.compare[0] : query.compare;
@@ -164,6 +179,25 @@ export default async function CmsChunkPage({ params, searchParams }: RouteProps)
               <div><dt>标签</dt><dd>{latest.tags.length > 0 ? latest.tags.join("、") : "无"}</dd></div>
               <div><dt>Agent 用途范围</dt><dd>{latest.allowedAgentScope.length > 0 ? latest.allowedAgentScope.join(", ") : "未指定"}</dd></div>
             </dl>
+          </section>
+          <section className="quality-panel" aria-labelledby="quality-title">
+            <h2 id="quality-title">文档质量检查</h2>
+            <p className="muted">
+              发布前提示，不会阻止保存、审核或发布。新鲜度通过标准：最近验证时间在 365 天内。
+            </p>
+            <ul className="quality-check-list">
+              {qualityChecks.map((check) => (
+                <li key={check.dimension}>
+                  <span className={`quality-indicator ${check.passed ? "quality-pass" : "quality-warning"}`}>
+                    {check.passed ? "通过" : "建议检查"}
+                  </span>
+                  <div>
+                    <strong>{check.dimension}</strong>
+                    <p>{check.message}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </section>
           {latest.reviewer && (
             <p className="reviewer-assignment">
