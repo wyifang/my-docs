@@ -35,3 +35,6 @@ dist-ssr
 *.sln
 # 忽略 Vim/Emacs 的临时交换文件（*.sw?）
 *.sw?
+.vercel
+.env*
+!.env.example
