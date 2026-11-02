@@ -332,6 +332,27 @@ p {
   border-radius: 10px;
 }
 
+.admin-record > form {
+  display: grid;
+  gap: 14px;
+}
+
+.password-reset {
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.password-reset summary {
+  color: var(--brand);
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.password-reset-form {
+  grid-template-columns: minmax(180px, 1fr) auto;
+  align-items: end;
+}
+
 .admin-record-heading,
 .admin-record-footer {
   display: flex;
@@ -1109,5 +1130,9 @@ p {
   .audit-pagination {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .password-reset-form {
+    grid-template-columns: 1fr;
   }
 }

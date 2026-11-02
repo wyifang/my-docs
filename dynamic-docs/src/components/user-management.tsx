@@ -27,6 +27,7 @@ function errorMessage(error: string): string {
     EMAIL_ALREADY_EXISTS: "该邮箱已存在。",
     ORGANIZATION_ID_ALREADY_EXISTS: "该组织 ID 已存在。",
     ORGANIZATION_NOT_FOUND_OR_INACTIVE: "所选组织不存在或已停用。",
+    SELF_PASSWORD_RESET_NOT_ALLOWED: "此入口不能重置当前管理员自己的密码。",
     FORBIDDEN: "当前账号没有执行此操作的权限。",
     UNAUTHENTICATED: "登录状态已失效，请重新登录。",
   };
@@ -126,6 +127,26 @@ export function UserManagement({
     }
   }
 
+  async function resetUserPassword(event: FormEvent<HTMLFormElement>, user: User) {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    setBusy(true);
+    setError("");
+    setNotice("");
+    const form = new FormData(formElement);
+    try {
+      await send(`/api/cms/admin/users/${encodeURIComponent(user.id)}/password`, "POST", {
+        password: form.get("password"),
+      });
+      formElement.reset();
+      setNotice(`${user.email} 的密码已重置；其原有登录会话和 Agent Token 已全部撤销。请通过安全渠道告知新密码。`);
+    } catch (caught) {
+      setError(errorMessage(caught instanceof Error ? caught.message : "UNKNOWN_ERROR"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function updateOrganization(event: FormEvent<HTMLFormElement>, organization: Organization) {
     event.preventDefault();
     setBusy(true);
@@ -179,42 +200,53 @@ export function UserManagement({
         {users.length === 0 ? <p className="muted">暂无用户。</p> : (
           <div className="admin-record-list">
             {users.map((user) => (
-              <form
+              <div
                 className="admin-record"
                 key={`${user.id}-${user.name}-${user.role}-${user.active}-${user.organizationId ?? ""}`}
-                onSubmit={(event) => updateUser(event, user)}
               >
-                <div className="admin-record-heading">
-                  <strong>{user.email}{user.id === currentUserId ? "（当前账号）" : ""}</strong>
-                  <span className={`status ${user.active ? "" : "status-draft"}`}>{user.active ? "启用" : "停用"}</span>
-                </div>
-                <div className="admin-fields">
-                  <label>姓名<input name="name" defaultValue={user.name} required maxLength={100} /></label>
-                  <label>角色
-                    <select name="role" defaultValue={user.role}>
-                      {roles.map((role) => <option key={role} value={role}>{role}</option>)}
-                    </select>
-                  </label>
-                  <label>所属组织
-                    <select name="organizationId" defaultValue={user.organizationId ?? ""}>
-                      <option value="">无组织</option>
-                      {organizations.map((organization) => (
-                        <option key={organization.id} value={organization.id} disabled={!organization.active}>
-                          {organization.name} ({organization.id}){organization.active ? "" : " · 已停用"}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="admin-active-toggle">
-                    <input name="active" type="checkbox" defaultChecked={user.active} />
-                    账号启用
-                  </label>
-                </div>
-                <div className="admin-record-footer">
-                  <span className="chunk-meta">创建于 {user.createdAt.slice(0, 10)}</span>
-                  <button className="button secondary" type="submit" disabled={busy}>保存用户设置</button>
-                </div>
-              </form>
+                <form onSubmit={(event) => updateUser(event, user)}>
+                  <div className="admin-record-heading">
+                    <strong>{user.email}{user.id === currentUserId ? "（当前账号）" : ""}</strong>
+                    <span className={`status ${user.active ? "" : "status-draft"}`}>{user.active ? "启用" : "停用"}</span>
+                  </div>
+                  <div className="admin-fields">
+                    <label>姓名<input name="name" defaultValue={user.name} required maxLength={100} /></label>
+                    <label>角色
+                      <select name="role" defaultValue={user.role}>
+                        {roles.map((role) => <option key={role} value={role}>{role}</option>)}
+                      </select>
+                    </label>
+                    <label>所属组织
+                      <select name="organizationId" defaultValue={user.organizationId ?? ""}>
+                        <option value="">无组织</option>
+                        {organizations.map((organization) => (
+                          <option key={organization.id} value={organization.id} disabled={!organization.active}>
+                            {organization.name} ({organization.id}){organization.active ? "" : " · 已停用"}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="admin-active-toggle">
+                      <input name="active" type="checkbox" defaultChecked={user.active} />
+                      账号启用
+                    </label>
+                  </div>
+                  <div className="admin-record-footer">
+                    <span className="chunk-meta">创建于 {user.createdAt.slice(0, 10)}</span>
+                    <button className="button secondary" type="submit" disabled={busy}>保存用户设置</button>
+                  </div>
+                </form>
+                {user.id !== currentUserId && (
+                  <details className="password-reset">
+                    <summary>重置密码并撤销原凭据</summary>
+                    <p className="muted">新密码至少 12 个字符。密码重置会立即使现有会话失效并撤销此用户的所有 Agent Token。</p>
+                    <form className="form password-reset-form" onSubmit={(event) => resetUserPassword(event, user)}>
+                      <label>新密码<input name="password" type="password" required minLength={12} maxLength={256} autoComplete="new-password" /></label>
+                      <button className="button secondary" type="submit" disabled={busy}>确认重置密码</button>
+                    </form>
+                  </details>
+                )}
+              </div>
             ))}
           </div>
         )}

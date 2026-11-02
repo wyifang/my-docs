@@ -100,6 +100,10 @@ export const adminUserUpdateSchema = z.object({
   active: z.boolean(),
 });
 
+export const adminPasswordResetSchema = z.object({
+  password: z.string().min(12).max(256),
+});
+
 export const adminOrganizationCreateSchema = z.object({
   id: z.string().trim().min(1).max(100).regex(/^[A-Za-z0-9._-]+$/),
   name: z.string().trim().min(1).max(200),

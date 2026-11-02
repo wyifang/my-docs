@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   adminOrganizationCreateSchema,
+  adminPasswordResetSchema,
   adminUserCreateSchema,
   adminUserUpdateSchema,
   chunkDraftSchema,
@@ -122,6 +123,12 @@ test("admin user updates reject unknown roles and require explicit account state
     organizationId: null,
     active: true,
   }).success, true);
+});
+
+test("admin password reset requires an adequate password length", () => {
+  assert.equal(adminPasswordResetSchema.safeParse({ password: "a-unique-password" }).success, true);
+  assert.equal(adminPasswordResetSchema.safeParse({ password: "short" }).success, false);
+  assert.equal(adminPasswordResetSchema.safeParse({ password: "x".repeat(257) }).success, false);
 });
 
 test("organization IDs are stable safe identifiers", () => {
