@@ -8,7 +8,7 @@
     "start": "next start",
     "postinstall": "npm run db:generate",
     "lint": "eslint",
-    "test": "tsx --test src/lib/schemas.test.ts src/lib/access.test.ts src/lib/attachment-access.test.ts src/lib/search-filter.test.ts src/lib/document-quality.test.ts src/lib/revision-diff.test.ts src/lib/storage.test.ts src/app/api/health/route.test.ts",
+    "test": "tsx --test src/lib/schemas.test.ts src/lib/access.test.ts src/lib/admin-management.test.ts src/lib/attachment-access.test.ts src/lib/search-filter.test.ts src/lib/document-quality.test.ts src/lib/revision-diff.test.ts src/lib/storage.test.ts src/app/api/health/route.test.ts",
     "db:generate": "prisma generate --schema prisma/postgresql/schema.prisma && prisma generate --schema prisma/schema.sqlite.prisma",
     "db:migrate": "prisma migrate dev --schema prisma/schema.sqlite.prisma",
     "db:migrate:postgres": "prisma migrate dev --schema prisma/postgresql/schema.prisma",

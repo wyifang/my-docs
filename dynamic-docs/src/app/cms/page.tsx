@@ -24,6 +24,7 @@ export default async function CmsPage() {
         <div><p className="eyebrow">CONTENT WORKSPACE</p><h1>内容管理</h1></div>
         <nav className="workspace-actions" aria-label="内容管理操作">
           <Link className="button secondary" href="/cms/pages">页面管理</Link>
+          {user.role === "ADMIN" && <Link className="button secondary" href="/cms/admin">用户与组织</Link>}
           {["ADMIN", "AUTHOR"].includes(user.role) && <Link className="button" href="/cms/new">新建 API Chunk</Link>}
         </nav>
       </section>

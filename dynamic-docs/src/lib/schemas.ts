@@ -83,6 +83,33 @@ export const loginSchema = z.object({
   password: z.string().min(1).max(256),
 });
 
+const userRoleSchema = z.enum(["ADMIN", "AUTHOR", "REVIEWER", "PUBLISHER", "VIEWER"]);
+
+export const adminUserCreateSchema = z.object({
+  email: z.string().trim().toLowerCase().pipe(z.email().max(254)),
+  name: z.string().trim().min(1).max(100),
+  password: z.string().min(12).max(256),
+  role: userRoleSchema,
+  organizationId: z.string().trim().min(1).max(100).nullable(),
+});
+
+export const adminUserUpdateSchema = z.object({
+  name: z.string().trim().min(1).max(100),
+  role: userRoleSchema,
+  organizationId: z.string().trim().min(1).max(100).nullable(),
+  active: z.boolean(),
+});
+
+export const adminOrganizationCreateSchema = z.object({
+  id: z.string().trim().min(1).max(100).regex(/^[A-Za-z0-9._-]+$/),
+  name: z.string().trim().min(1).max(200),
+});
+
+export const adminOrganizationUpdateSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  active: z.boolean(),
+});
+
 export const workflowSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("submit") }),
   z.object({ action: z.literal("approve") }),

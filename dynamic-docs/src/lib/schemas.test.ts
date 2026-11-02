@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { chunkDraftSchema, pageDraftSchema } from "@/lib/schemas";
+import {
+  adminOrganizationCreateSchema,
+  adminUserCreateSchema,
+  adminUserUpdateSchema,
+  chunkDraftSchema,
+  pageDraftSchema,
+} from "@/lib/schemas";
 
 const validApiChunk = {
   title: "Create chat completion",
@@ -82,4 +88,49 @@ test("rejects duplicate Chunk references and invalid page slugs", () => {
   };
   assert.equal(pageDraftSchema.safeParse(input).success, false);
   assert.equal(pageDraftSchema.safeParse({ ...input, slug: "chat-guide", chunkIds: ["chunk-operation"] }).success, true);
+});
+
+test("admin user creation normalizes email and requires a strong initial password", () => {
+  const parsed = adminUserCreateSchema.safeParse({
+    email: " CUSTOMER@example.test ",
+    name: "Customer",
+    password: "a-unique-password",
+    role: "VIEWER",
+    organizationId: "sample-customer",
+  });
+  assert.equal(parsed.success, true);
+  if (parsed.success) assert.equal(parsed.data.email, "customer@example.test");
+  assert.equal(adminUserCreateSchema.safeParse({
+    email: "customer@example.test",
+    name: "Customer",
+    password: "short",
+    role: "VIEWER",
+    organizationId: null,
+  }).success, false);
+});
+
+test("admin user updates reject unknown roles and require explicit account state", () => {
+  assert.equal(adminUserUpdateSchema.safeParse({
+    name: "Customer",
+    role: "SUPERUSER",
+    organizationId: null,
+    active: true,
+  }).success, false);
+  assert.equal(adminUserUpdateSchema.safeParse({
+    name: "Customer",
+    role: "VIEWER",
+    organizationId: null,
+    active: true,
+  }).success, true);
+});
+
+test("organization IDs are stable safe identifiers", () => {
+  assert.equal(adminOrganizationCreateSchema.safeParse({
+    id: "sample-customer.v2",
+    name: "Sample Customer",
+  }).success, true);
+  assert.equal(adminOrganizationCreateSchema.safeParse({
+    id: "../customer",
+    name: "Sample Customer",
+  }).success, false);
 });

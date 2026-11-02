@@ -9,8 +9,8 @@ export default function LoginPage() {
       </header>
       <section className="panel">
         <p className="eyebrow">CMS ACCESS</p>
-        <h1>员工登录</h1>
-        <p className="muted">账号由管理员通过环境变量配置；当前 MVP 不开放自助注册。</p>
+        <h1>账号登录</h1>
+        <p className="muted">账号由管理员创建和管理；当前 MVP 不开放自助注册。</p>
         <LoginForm />
       </section>
     </main>
