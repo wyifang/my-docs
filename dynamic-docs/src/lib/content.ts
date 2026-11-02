@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import type { ChunkDraftInput } from "@/lib/schemas";
 import type { CurrentUser } from "@/lib/auth";
 import { getReviewerVisibleRevisions } from "@/lib/revision-diff";
+import { filterSearchCandidates } from "@/lib/search-filter";
 
 type RevisionRow = {
   id: string;
@@ -259,32 +260,20 @@ export async function searchPublishedChunks(input: {
     orderBy: { revision: { title: "asc" } },
   });
 
-  const query = input.q.trim().toLocaleLowerCase();
-  const permitted = candidates.filter(({ revision }) =>
-    canAccessPublishedRevision(revision, input.user, input) &&
-    (!input.requiredAgentScope ||
-      allowsAgentScope(revision, input.requiredAgentScope)),
-  );
-  const matched = permitted.filter(({ revision }) => {
-    if (!query) return true;
-    const searchable = [
-      revision.title,
-      revision.bodyJson,
-      revision.tags,
-      revision.product,
-      revision.apiVersion,
-      revision.language,
-      revision.contentType,
-    ].join("\n").toLocaleLowerCase();
-    return searchable.includes(query);
-  });
-  const pageSize = 20;
-  const start = (input.page - 1) * pageSize;
-  return {
-    chunks: matched.slice(start, start + pageSize).map(({ revision }) => serializeRevision(revision)),
+  const result = filterSearchCandidates({
+    candidates,
+    query: input.q,
     page: input.page,
-    pageSize,
-    total: matched.length,
+    canAccess: ({ revision }) =>
+      canAccessPublishedRevision(revision, input.user, input) &&
+      (!input.requiredAgentScope ||
+        allowsAgentScope(revision, input.requiredAgentScope)),
+  });
+  return {
+    chunks: result.candidates.map(({ revision }) => serializeRevision(revision)),
+    page: input.page,
+    pageSize: result.pageSize,
+    total: result.total,
   };
 }
 

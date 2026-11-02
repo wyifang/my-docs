@@ -1,8 +1,8 @@
 # DocForge：动态技术文档 MVP
 
-阶段 2–7 的可运行原型：Next.js 前台与 CMS、账号/角色、不可变 Chunk 与页面修订、审核/发布、受权限过滤的 Agent API 和 MCP stdio 工具；本地使用 SQLite/磁盘附件，云端目标为 Neon PostgreSQL/Vercel 私有 Blob，并支持把本地数据导入云端。
+阶段 2–7 的可运行 MVP：Next.js 前台与 CMS、账号/角色、不可变 Chunk 与页面修订、审核/发布、受权限过滤的 Agent API 和 MCP stdio 工具。本地使用 SQLite/磁盘附件；生产部署使用 Neon PostgreSQL 与 Vercel Private Blob。云端迁移已完成，但正式生产验收和运维准备仍在进行。
 
-> 生产部署尚未完成：需要配置 Vercel、Neon 和私有 Blob 环境变量，执行一次云端迁移/导入，并先完成人员身份接入、登录防护与数据备份策略。不要把本地 `.env`、SQLite 数据库或附件目录提交到 Git。
+> 部署及数据导入已完成；正式投入生产前仍需接入正式人员身份系统、完善登录防护、建立并演练备份/恢复策略，并完成端到端验收。不要把本地 `.env`、SQLite 数据库或附件目录提交到 Git。
 
 ## 当前闭环
 
@@ -187,7 +187,7 @@ npm run mcp:stdio
 | `PUBLISHER` | 查看已批准修订并发布或撤回 |
 | `VIEWER` | CMS 仅显示公开内容；暂不提供自助注册 |
 
-该 MVP 通过独立 API 路由执行服务端检查；UI 隐藏按钮不是授权依据。当前实现 API Reference Chunk、可组合页面、中英文关联、受控附件上传和面向小规模数据集的全文子串检索。检索在服务端先过滤已发布状态、身份/组织授权和版本适用条件，再匹配标题、正文、标签及元数据；MVP 对候选记录做应用层扫描，尚未建立倒排索引。数据量或查询延迟增长时应迁移到 SQLite FTS5 或 PostgreSQL 全文检索，并维持相同的授权过滤边界。暂不包含用户/组管理 UI、复杂组织 ABAC、专用搜索集群或 MCP。
+该 MVP 通过独立 API 路由执行服务端检查；UI 隐藏按钮不是授权依据。当前实现 API Reference Chunk、可组合页面、中英文关联、受控附件上传和面向小规模数据集的全文子串检索。检索在服务端先过滤已发布状态、身份/组织授权和版本适用条件，再匹配标题、正文、标签及元数据；搜索结果数量和分页也只基于授权后的内容。MVP 对候选记录做应用层扫描，尚未建立倒排索引；数据量或查询延迟增长时应迁移到 SQLite FTS5 或 PostgreSQL 全文检索，并维持相同的授权过滤边界。暂不包含用户/组管理 UI、复杂组织 ABAC、专用搜索集群或远程 MCP HTTP/OAuth。
 
 ## 数据模型
 
@@ -202,6 +202,6 @@ npm run mcp:stdio
 - `User` / `Session`：角色账号与数据库侧会话；浏览器只持有随机 HttpOnly Cookie。
 - `AuditEvent`：记录草稿创建、提交审核、审核决定、发布和撤回。
 
-`allowedAgentScope` 是用途限制，不是授权。未来 Agent/MCP 请求仍须由后端根据会话或 API 凭证判断真实调用者权限。
+`allowedAgentScope` 是用途限制，不是授权。Agent REST API 和本地 MCP stdio 适配器使用绑定到现有用户的凭据；服务端读取用户角色和组织，并同时检查发布状态、适用条件与 scope。MCP 目前仅提供本地 stdio transport，未开放远程 HTTP/OAuth 接入。
 
-此阶段含 `zh-CN` 和 `en-US` 字段验证，但跨语言 Chunk 关联及语言版本独立发布安排在阶段 5；不要通过修改同一个 Chunk 的语言来创建翻译。
+系统支持 `zh-CN` 和 `en-US` 字段验证及跨语言 Chunk/页面关联；不同语言版本分别管理修订、审核和发布状态。不要通过修改同一个 Chunk 的语言来创建翻译。
