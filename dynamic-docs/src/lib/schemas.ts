@@ -79,7 +79,7 @@ export const chunkDraftSchema = chunkDraftObjectSchema.superRefine((value, conte
 });
 
 export const loginSchema = z.object({
-  email: z.email().max(254),
+  email: z.string().trim().toLowerCase().pipe(z.email().max(254)),
   password: z.string().min(1).max(256),
 });
 

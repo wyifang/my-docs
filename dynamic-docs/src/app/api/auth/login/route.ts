@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { hashSessionToken, SESSION_COOKIE, SESSION_DURATION_MS, verifyPassword } from "@/lib/auth";
 import { isSameOrigin, invalidJson } from "@/lib/http";
+import { clearLoginFailures, getLoginRetryAfter, recordLoginFailure } from "@/lib/login-throttle";
 import { loginSchema } from "@/lib/schemas";
 
 export async function POST(request: Request) {
@@ -21,13 +22,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "INVALID_CREDENTIALS" }, { status: 400 });
   }
 
+  const email = parsed.data.email;
+  const retryAfter = await getLoginRetryAfter(email);
+  if (retryAfter !== null) {
+    return NextResponse.json(
+      { error: "TOO_MANY_LOGIN_ATTEMPTS" },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } },
+    );
+  }
+
   const user = await db.user.findUnique({
-    where: { email: parsed.data.email.toLowerCase() },
+    where: { email },
   });
   if (!user?.active || !verifyPassword(parsed.data.password, user.passwordHash)) {
+    await recordLoginFailure(email);
     return NextResponse.json({ error: "INVALID_CREDENTIALS" }, { status: 401 });
   }
 
+  await clearLoginFailures(email);
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
   await db.session.create({

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser, hasRole, hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { isSameOrigin, invalidJson } from "@/lib/http";
+import { loginThrottleIdentifier } from "@/lib/login-throttle";
 import { adminPasswordResetSchema } from "@/lib/schemas";
 
 type RouteContext = { params: Promise<{ userId: string }> };
@@ -36,7 +37,7 @@ export async function POST(request: Request, context: RouteContext) {
   }
   const target = await db.user.findUnique({
     where: { id: userId },
-    select: { id: true },
+    select: { id: true, email: true },
   });
   if (!target) return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
 
@@ -50,6 +51,9 @@ export async function POST(request: Request, context: RouteContext) {
     await transaction.agentToken.updateMany({
       where: { userId, revokedAt: null },
       data: { revokedAt: new Date() },
+    });
+    await transaction.loginThrottle.deleteMany({
+      where: { identifier: loginThrottleIdentifier(target.email) },
     });
     await transaction.auditEvent.create({
       data: {

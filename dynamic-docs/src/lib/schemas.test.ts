@@ -6,8 +6,30 @@ import {
   adminUserCreateSchema,
   adminUserUpdateSchema,
   chunkDraftSchema,
+  loginSchema,
   pageDraftSchema,
 } from "@/lib/schemas";
+import { LOGIN_FAILURE_LIMIT, loginRetryAfterSeconds, loginThrottleIdentifier } from "@/lib/login-throttle";
+
+test("login identifiers are normalized before validation", () => {
+  const result = loginSchema.safeParse({ email: "  ADMIN@Example.com ", password: "pass" });
+  assert.equal(result.success, true);
+  if (result.success) assert.equal(result.data.email, "admin@example.com");
+});
+
+test("login failure throttle blocks only after the threshold and expires with its window", () => {
+  const now = new Date("2026-11-03T00:00:00.000Z");
+  const startedAt = new Date(now.getTime() - 5 * 60 * 1000);
+  assert.equal(loginRetryAfterSeconds(LOGIN_FAILURE_LIMIT - 1, startedAt, now), null);
+  assert.equal(loginRetryAfterSeconds(LOGIN_FAILURE_LIMIT, startedAt, now), 600);
+  assert.equal(loginRetryAfterSeconds(LOGIN_FAILURE_LIMIT, new Date(now.getTime() - 15 * 60 * 1000), now), null);
+});
+
+test("login throttle keys are stable and do not contain the email", () => {
+  const identifier = loginThrottleIdentifier(" Admin@Example.com ");
+  assert.equal(identifier, loginThrottleIdentifier("admin@example.com"));
+  assert.equal(identifier.includes("@"), false);
+});
 
 const validApiChunk = {
   title: "Create chat completion",

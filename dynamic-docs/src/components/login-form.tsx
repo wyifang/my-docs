@@ -23,7 +23,13 @@ export function LoginForm() {
         }),
       });
       if (!response.ok) {
-        setError(response.status === 401 ? "邮箱或密码不正确。" : "登录失败，请检查输入后重试。");
+        if (response.status === 429) {
+          const retryAfter = Number(response.headers.get("Retry-After"));
+          const minutes = Number.isFinite(retryAfter) ? Math.max(1, Math.ceil(retryAfter / 60)) : 15;
+          setError(`尝试次数过多，请约 ${minutes} 分钟后重试。`);
+        } else {
+          setError(response.status === 401 ? "邮箱或密码不正确。" : "登录失败，请检查输入后重试。");
+        }
         return;
       }
       router.push("/cms");

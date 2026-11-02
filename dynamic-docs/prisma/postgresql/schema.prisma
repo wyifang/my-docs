@@ -61,6 +61,14 @@ model Session {
   @@index([expiresAt])
 }
 
+model LoginThrottle {
+  identifier      String   @id
+  windowStartedAt DateTime
+  failureCount    Int      @default(0)
+
+  @@index([windowStartedAt])
+}
+
 model Organization {
   id        String   @id
   name      String
