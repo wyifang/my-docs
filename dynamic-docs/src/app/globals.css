@@ -383,6 +383,114 @@ p {
   color: #176253;
 }
 
+.audit-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: end;
+  margin: 24px 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.audit-filters label {
+  display: grid;
+  gap: 5px;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.audit-filters input,
+.audit-filters select {
+  width: 100%;
+  min-height: 40px;
+  padding: 7px 9px;
+  border: 1px solid #c8d4dc;
+  border-radius: 7px;
+  background: white;
+  color: var(--ink);
+}
+
+.audit-list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.audit-record {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.audit-record-heading,
+.audit-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.audit-record-heading time {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.audit-record-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 8px 20px;
+  margin: 0;
+}
+
+.audit-record-meta > div {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.audit-record-meta dt {
+  color: var(--muted);
+}
+
+.audit-record-meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.audit-record details summary {
+  color: var(--brand);
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.audit-record pre {
+  max-height: 300px;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f3f6f7;
+  font-size: 0.82rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.audit-pagination {
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .empty-state,
 .panel,
 .content-card {
@@ -996,7 +1104,9 @@ p {
   }
 
   .admin-record-heading,
-  .admin-record-footer {
+  .admin-record-footer,
+  .audit-record-heading,
+  .audit-pagination {
     align-items: flex-start;
     flex-direction: column;
   }

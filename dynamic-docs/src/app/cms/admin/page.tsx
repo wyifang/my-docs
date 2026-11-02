@@ -41,6 +41,9 @@ export default async function AdminPage() {
           <p className="eyebrow">ADMINISTRATION</p>
           <h1>用户与组织管理</h1>
         </div>
+        <Link className="button secondary" href="/cms/admin/audit">
+          查看审计日志
+        </Link>
       </section>
       <p className="muted">
         只有管理员可访问此页面。停用用户或组织会撤销关联会话和 Agent Token；用户停用后需重新启用并重新签发 Token 才能恢复访问。
